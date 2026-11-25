@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RxPx Hospitals - Login</title>
-    <link rel="stylesheet" href="css/style.css?v=20261124j">
+    <link rel="stylesheet" href="css/style.css?v=20261124k">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/png" href="images/logo.png">
@@ -14,14 +14,21 @@
 <body class="login-body">
     <div class="login-container">
         <div class="login-left">
-            <div class="brand" style="flex-direction: column; gap: 15px; margin-bottom: 20px;">
-                <img src="images/logo-banner.png" alt="RxPx Hospitals Logo" style="max-width: 220px; height: auto;">
-                <h1 id="loginHospitalName" style="font-size: 1.8rem; line-height: 1.2; text-align: center; color: #111827;">RxPx Hospitals</h1>
+            <div class="login-brandlock">
+                <span class="login-logo-mark">Rx</span>
+                <span class="login-brand-text">
+                    <strong>RxPx</strong>
+                    <small>Hospitals</small>
+                </span>
             </div>
-            <p class="tagline">Healing Happens Here</p>
-            <div class="login-illustration">
-                <i class="fa-solid fa-stethoscope"></i>
-            </div>
+            <p class="login-kicker">Healing Happens Here</p>
+            <h1 class="login-headline">Care, clear<br>enough to trust.</h1>
+            <p class="login-copy">One place for OP visits, appointments, billing, pharmacy, lab and maternity records — built for the way RxPx Hospitals cares for Pulivendula.</p>
+            <ul class="login-points">
+                <li><span class="login-tick"><i class="fa-solid fa-check"></i></span>OP queue, billing and pharmacy in one flow</li>
+                <li><span class="login-tick"><i class="fa-solid fa-check"></i></span>Doctor portals for OBG and Family Medicine</li>
+                <li><span class="login-tick"><i class="fa-solid fa-check"></i></span>Every rupee tracked in today's collections</li>
+            </ul>
         </div>
         <div class="login-right">
             <div class="login-form-wrapper">
@@ -45,26 +52,24 @@
             </div>
         </div>
     </div>
-    <script src="js/local-db.js?v=20261124j"></script>
-    <script src="js/hospital-policy.js?v=20261124j"></script>
-<script src="js/helpers.js?v=20261124j"></script>
-    <script src="js/hospital-forms.js?v=20261124j"></script>
+    <script src="js/local-db.js?v=20261124k"></script>
+    <script src="js/hospital-policy.js?v=20261124k"></script>
+<script src="js/helpers.js?v=20261124k"></script>
+    <script src="js/hospital-forms.js?v=20261124k"></script>
     <script>
         (function loadLoginHospitalName() {
             var fallback = 'RxPx Hospitals';
             db.collection('publicHospital').doc('main').get()
                 .then(function(doc) {
                     var hospitalName = doc.exists && doc.data().hospitalName ? doc.data().hospitalName : fallback;
-                    document.getElementById('loginHospitalName').textContent = hospitalName;
                     document.title = hospitalName + ' - Login';
                 })
                 .catch(function() {
-                    document.getElementById('loginHospitalName').textContent = fallback;
                     document.title = fallback + ' - Login';
                 });
         })();
     </script>
-    <script src="js/login.js?v=20261124j"></script>
+    <script src="js/login.js?v=20261124k"></script>
 </body>
 </html>
 
