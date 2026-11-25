@@ -784,24 +784,8 @@ document.querySelectorAll('#profileTabs .tab-btn').forEach(btn => {
     });
 });
 
+// Portal removed — PIN feature retired with it.
 function setPatientPortalPinFromProfile() {
-    if (!currentPatientDocId || !currentPatientId) {
-        showToast('Patient not loaded.', 'warning');
-        return;
-    }
-    var pin = prompt('Set a 4–8 digit portal PIN for ' + (currentPatient.name || currentPatientId) + '.\nShare Patient ID + PIN with the attendant.\nPortal URL: portal.html');
-    if (pin == null) return;
-    pin = String(pin).trim();
-    if (!/^\d{4,8}$/.test(pin)) {
-        showToast('PIN must be 4–8 digits.', 'error');
-        return;
-    }
-    callFunction('setPatientPortalPin', { patientDocId: currentPatientDocId, pin: pin })
-        .then(function () {
-            showToast('Portal PIN set. Patient can open portal.html with ID ' + currentPatientId, 'success');
-        })
-        .catch(function (err) {
-            showToast(err.message || 'Could not set portal PIN.', 'error');
-        });
+    showToast('Patient portal has been removed.', 'warning');
 }
 window.setPatientPortalPinFromProfile = setPatientPortalPinFromProfile;

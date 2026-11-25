@@ -1735,7 +1735,7 @@ async function seedDemoPortalPins() {
         }
     }
     if (n % 400 !== 0) await batch.commit();
-    logToConsole('Portal PIN 1234 set on ' + n + ' demo patients (portal.html).', 'success');
+    logToConsole('Portal PIN 1234 set on ' + n + ' demo patients.', 'success');
 }
 window.seedDemoPortalPins = seedDemoPortalPins;
 window.setupFeatureDemoExtras = setupFeatureDemoExtras;

@@ -1133,7 +1133,7 @@ window.toggleMobileMenu = toggleMobileMenu;
 // ==========================================
 function renderBackButton() {
     var page = (window.location.pathname.split('/').pop() || 'index.html').split('?')[0];
-    if (!page || page === 'index.html' || page === 'dashboard.html' || page === 'portal.html' || page === 'queue-display.html') return;
+    if (!page || page === 'index.html' || page === 'dashboard.html') return;
     var navbar = document.querySelector('.navbar');
     if (!navbar || document.getElementById('navBackBtn')) return;
 
@@ -4373,11 +4373,11 @@ async function createDispensingSlipPDF(disp, settings) {
 }
 window.createDispensingSlipPDF = createDispensingSlipPDF;
 
-// Auto-load shared UI extensions on staff pages (not login / portal / queue display).
+// Auto-load shared UI extensions on staff pages (not login).
 (function injectFeatureScripts() {
     try {
         var page = (location.pathname.split("/").pop() || "").split("?")[0];
-        if (!page || page === "index.html" || page === "portal.html" || page === "queue-display.html") return;
+        if (!page || page === "index.html") return;
         ["js/branch.js?v=202608131200", "js/i18n.js?v=202608131200"].forEach(function (src) {
             if (document.querySelector("script[src^=\"" + src.split("?")[0] + "\"]")) return;
             var s = document.createElement("script");

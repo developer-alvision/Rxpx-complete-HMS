@@ -440,7 +440,6 @@ async function loadDashboardData(user) {
                 <a href="ot-schedule.html" class="btn-primary" style="text-decoration:none;"><i class="fa-solid fa-calendar-plus"></i> Schedule OT</a>
                 <a href="maternity-care.html" class="btn-primary" style="text-decoration:none;"><i class="fa-solid fa-person-pregnant"></i> Maternity</a>
                 <a href="op-queue.html" class="btn-primary" style="text-decoration:none;"><i class="fa-solid fa-ticket"></i> OP Queue</a>
-                <a href="portal.html" class="btn-secondary" style="text-decoration:none;" target="_blank"><i class="fa-solid fa-mobile-screen"></i> Patient Portal</a>
             </div>
         `;
         if (tablesEl) tablesEl.style.display = 'grid';

@@ -35,7 +35,6 @@ const APP_SHELL = [
     'discharge.html',
     'op-queue.html',
     'inventory-alerts.html',
-    'portal.html',
     'css/style.css',
     'js/local-db.js',
     'js/helpers.js',

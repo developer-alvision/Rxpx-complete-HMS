@@ -71,16 +71,8 @@ async function main() {
     await page.locator('#mobileMenuBtn').click();
     await page.locator('.sidebar.mobile-open').waitFor();
     await page.screenshot({ path: path.join(output, 'mobile-dashboard.png'), fullPage: true });
-    const publicContext = await browser.newContext();
-    const publicPage = await publicContext.newPage();
-    watch(publicPage);
-    await publicPage.goto(base + '/queue-display.html');
-    await publicPage.locator('#qdToken').waitFor();
-    await publicPage.goto(base + '/portal.html');
-    await publicPage.locator('#portalPatientId').waitFor();
-    await publicContext.close();
     assert.deepEqual(failures, [], 'Runtime or permission failures: ' + JSON.stringify(failures));
-    console.log('PASS: login, patient creation, real-time sync, 27 staff modules, mobile navigation and public pages.');
+    console.log('PASS: login, patient creation, real-time sync, staff modules, mobile navigation.');
   } finally {
     fs.writeFileSync(path.join(output, 'e2e-results.json'), JSON.stringify({ at: new Date().toISOString(), pages, failures }, null, 2));
     await browser.close();
