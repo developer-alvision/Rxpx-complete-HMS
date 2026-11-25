@@ -1119,7 +1119,16 @@ document.addEventListener('keydown', function(e) {
 
 function toggleMobileMenu() {
     var sidebar = document.querySelector('.sidebar');
-    if (sidebar) sidebar.classList.toggle('mobile-open');
+    if (!sidebar) return;
+    var open = sidebar.classList.toggle('mobile-open');
+    var overlay = document.querySelector('.sidebar-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'sidebar-overlay';
+        overlay.onclick = toggleMobileMenu;
+        document.body.appendChild(overlay);
+    }
+    overlay.classList.toggle('open', open);
 }
 window.toggleMobileMenu = toggleMobileMenu;
 

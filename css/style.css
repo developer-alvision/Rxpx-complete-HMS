@@ -75,44 +75,37 @@ h1, h2, h3, h4 {
 ::-webkit-scrollbar-thumb { background: #D9D3C9; border-radius: 8px; border: 2px solid var(--bg-light); }
 ::-webkit-scrollbar-track { background: transparent; }
 
-/* --- App shell — stacked: top navigation header, then content --- */
+/* --- App shell — sidebar pinned to the left, content beside it --- */
 .app-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     min-height: 100vh;
 }
 
-/* Top navigation header — white bar pinned to the top, menu scrolls
-   horizontally when there are many items. */
+/* Floating white sidebar — rounded panel anchored to the left edge */
 .sidebar {
-    width: 100%;
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    bottom: 14px;
+    width: 248px;
     background-color: var(--white);
     color: var(--text-main);
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
-    position: sticky;
-    top: 0;
-    left: auto;
-    bottom: auto;
-    height: auto;
-    min-height: 62px;
-    padding: 6px 20px;
-    border-radius: 0;
-    box-shadow: none;
-    border-bottom: 1px solid var(--border-color);
-    z-index: 100;
-    overflow: visible;
+    flex-direction: column;
+    border-radius: 22px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+    z-index: 200;
+    overflow: hidden;
 }
 
 .sidebar-header {
-    height: auto;
+    padding: 18px 18px 14px;
     display: flex;
     align-items: center;
-    padding: 6px 0;
     background-color: transparent;
-    border-bottom: none;
+    border-bottom: 1px solid var(--border-color);
     font-family: var(--font-display);
     font-size: 1rem;
     font-weight: 700;
@@ -127,44 +120,54 @@ h1, h2, h3, h4 {
     color: var(--primary-teal);
 }
 
-/* Horizontal menu strip */
+/* Vertical menu — scrolls inside the panel when long */
 .sidebar-nav {
     display: flex;
-    flex-direction: row;
-    align-items: center;
+    flex-direction: column;
     gap: 2px;
-    padding: 0 0 0 10px;
+    padding: 12px 12px 16px;
     flex: 1;
-    min-width: 0;
-    overflow-x: auto;
-    overflow-y: hidden;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
 }
 
-.sidebar-nav::-webkit-scrollbar { height: 0; }
-.sidebar-nav::-webkit-scrollbar-thumb { background: transparent; }
-.sidebar-nav::-webkit-scrollbar-track { background: transparent; }
-
-/* Groups become inline segments; collapse chevrons make no sense
-   horizontally, so group labels are hidden and items always show. */
+/* Collapsible groups — uppercase labels with rotating chevron */
 .nav-group {
     display: flex;
-    align-items: center;
-    flex-shrink: 0;
+    flex-direction: column;
 }
 
 .nav-group-label {
-    display: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 10px 5px;
+    margin-top: 6px;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    cursor: pointer;
+    user-select: none;
+    transition: var(--transition);
+}
+.nav-group-label:hover { color: var(--text-strong); }
+.nav-group-label i.chev {
+    font-size: 9px;
+    transition: transform 0.18s ease;
 }
 
 .nav-group-items {
     display: flex;
-    flex-direction: row;
-    align-items: center;
+    flex-direction: column;
+    gap: 2px;
 }
-.nav-group.collapsed .nav-group-items { display: flex; }
-.nav-group.collapsed .nav-group-label i.chev { transform: none; }
+.nav-group.collapsed .nav-group-items { display: none; }
+.nav-group.collapsed .nav-group-label i.chev { transform: rotate(-90deg); }
 
 /* Side history drawers */
 .hms-drawer-overlay {
@@ -187,29 +190,29 @@ h1, h2, h3, h4 {
 }
 .hms-drawer-body { flex: 1; overflow: auto; padding: 14px 18px; }
 
-/* Nav items — compact pills in the top strip; active = solid ink with orange icon */
+/* Nav items — full-width rows; active = solid ink with orange icon */
 .nav-item {
     display: flex;
     align-items: center;
     margin: 0;
-    padding: 8px 13px;
-    border-radius: 10px;
+    padding: 9px 12px;
+    border-radius: 12px;
     color: #5C574F;
     text-decoration: none;
     transition: var(--transition);
     font-size: 0.84rem;
     font-weight: 600;
     white-space: nowrap;
-    flex-shrink: 0;
 }
 
 .nav-item i {
     width: 18px;
-    margin-right: 8px;
+    margin-right: 10px;
     font-size: 0.85rem;
     color: #9A948A;
     text-align: center;
     transition: var(--transition);
+    flex-shrink: 0;
 }
 
 .nav-item:hover {
@@ -226,26 +229,28 @@ h1, h2, h3, h4 {
 }
 .nav-item.active i { color: var(--primary-teal); }
 
-/* Main content — full width below the top header */
+/* Main content — beside the fixed sidebar */
 .main-wrapper {
     flex: 1;
-    margin-left: 0;
+    margin-left: 276px; /* sidebar 248 + 14px gap on each side */
     display: flex;
     flex-direction: column;
     min-width: 0;
 }
 
-/* Navbar — page title row below the top header; transparent on canvas */
+/* Navbar — sticky page-title bar above the content */
 .navbar {
     min-height: var(--navbar-height);
-    background-color: transparent;
-    border-bottom: none;
+    background-color: var(--white);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
-    padding: 18px 32px 6px;
-    position: static;
+    padding: 8px 24px;
+    position: sticky;
+    top: 0;
     z-index: 90;
 }
 
@@ -1216,12 +1221,24 @@ button:disabled, .btn-primary:disabled, .btn-secondary:disabled {
 }
 
 @media (max-width: 768px) {
+    /* Sidebar becomes an off-canvas drawer, toggled by the hamburger */
     .sidebar {
-        padding: 4px 12px;
-        min-height: 56px;
-        gap: 6px;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 268px;
+        max-width: 84vw;
+        border-radius: 0;
+        border: none;
+        box-shadow: var(--shadow-lg);
+        transform: translateX(-105%);
+        transition: transform 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1300;
     }
-    .sidebar-header { padding: 4px 0; font-size: 0.9rem; }
+    .sidebar.mobile-open {
+        transform: translateX(0);
+    }
+    .sidebar-header { padding: 14px 16px 12px; font-size: 0.9rem; }
     .sidebar-header img { height: 28px !important; width: 28px !important; }
     .main-wrapper {
         margin-left: 0 !important;
@@ -1231,10 +1248,8 @@ button:disabled, .btn-primary:disabled, .btn-secondary:disabled {
         padding-left: 16px !important;
         padding-right: 16px !important;
     }
-    /* On phones the top strip scrolls sideways; the hamburger toggle
-       is no longer needed. */
     #mobileMenuBtn {
-        display: none !important;
+        display: block !important;
     }
     .page-content {
         padding: 12px 16px 36px;
@@ -1245,6 +1260,21 @@ button:disabled, .btn-primary:disabled, .btn-secondary:disabled {
     th, td {
         padding: 11px 14px;
     }
+}
+
+/* Dim overlay behind the mobile drawer */
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(16, 16, 20, 0.4);
+    z-index: 1290;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+.sidebar-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 /* Classic minimal panels (lab / imaging / pharmacy) */
