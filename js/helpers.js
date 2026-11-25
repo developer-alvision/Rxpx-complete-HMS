@@ -1059,6 +1059,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (btn) btn.style.display = 'block';
     }
     renderAppFooter();
+    renderBackButton();
     registerServiceWorker();
 
     // Hospital settings are readable only to signed-in staff, so both of
@@ -1121,6 +1122,40 @@ function toggleMobileMenu() {
     if (sidebar) sidebar.classList.toggle('mobile-open');
 }
 window.toggleMobileMenu = toggleMobileMenu;
+
+// ==========================================
+// BACK BUTTON — injected into the navbar of
+// every module page (not login/dashboard).
+// Returns to wherever the user came from
+// (Quick Actions, sidebar, a patient profile…);
+// falls back to the dashboard when the page
+// was opened directly in a new tab.
+// ==========================================
+function renderBackButton() {
+    var page = (window.location.pathname.split('/').pop() || 'index.html').split('?')[0];
+    if (!page || page === 'index.html' || page === 'dashboard.html' || page === 'portal.html' || page === 'queue-display.html') return;
+    var navbar = document.querySelector('.navbar');
+    if (!navbar || document.getElementById('navBackBtn')) return;
+
+    var btn = document.createElement('button');
+    btn.id = 'navBackBtn';
+    btn.className = 'btn-back';
+    btn.type = 'button';
+    btn.title = 'Back to Dashboard';
+    btn.setAttribute('aria-label', 'Back to Dashboard');
+    btn.innerHTML = '<i class="fa-solid fa-arrow-left"></i><span>Back</span>';
+    btn.onclick = function () {
+        var sameSite = document.referrer && document.referrer.indexOf(location.host) !== -1;
+        if (window.history.length > 1 && sameSite) {
+            window.history.back();
+        } else {
+            window.location.href = 'dashboard.html';
+        }
+    };
+
+    var title = navbar.querySelector('.nav-title');
+    navbar.insertBefore(btn, title || navbar.firstChild);
+}
 
 window.addEventListener('offline', function() {
     var banner = document.getElementById('offlineBanner');
