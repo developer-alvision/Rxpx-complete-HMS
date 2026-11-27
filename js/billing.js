@@ -3290,7 +3290,7 @@ function openRunningBillModal(bill) {
     if (dischargeBtn) {
         getCurrentUser(function(u) {
             const role = (u.role || '').toLowerCase();
-            if (role === 'admin' || role === 'receptionist') {
+            if (role === 'admin' || role === 'receptionist' || u.isAdmin === true) {
                 dischargeBtn.style.display = 'block';
             } else {
                 dischargeBtn.style.display = 'none';

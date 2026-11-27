@@ -15,7 +15,7 @@ getCurrentUser((user) => {
     // Load financial overview for receptionist, billing_staff, admin, and owner roles
     const role = (user.role || '').toLowerCase();
     dashboardRole = role;
-    if (['receptionist', 'billing_staff', 'admin', 'owner'].includes(role)) {
+    if (['receptionist', 'billing_staff', 'admin', 'owner'].includes(role) || user.isAdmin === true) {
         loadFinancialOverview();
     } else {
         const container = document.getElementById('financialOverviewContainer');

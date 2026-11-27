@@ -26,5 +26,18 @@ for (const file of fs.readdirSync(root).filter(name => name.endsWith('.html'))) 
   }
 }
 for (const file of ['firebase.json', 'firestore.indexes.json', 'manifest.webmanifest', 'vercel.json']) JSON.parse(fs.readFileSync(path.join(root, file), 'utf8'));
+const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.webmanifest'), 'utf8'));
+for (const entry of [...(manifest.shortcuts || []).map(s => s.url), ...(manifest.icons || []).map(i => i.src)]) {
+  const local = String(entry || '').split(/[?#]/)[0];
+  if (local && !fs.existsSync(path.join(root, local))) { failures++; console.error('Missing manifest asset: ' + local); }
+}
+const swSource = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+const shellMatch = swSource.match(/const\s+APP_SHELL\s*=\s*\[([\s\S]*?)\];/);
+if (shellMatch) {
+  for (const [, item] of shellMatch[1].matchAll(/['"]([^'"]+)['"]/g)) {
+    if (item === './') continue;
+    if (!fs.existsSync(path.join(root, item))) { failures++; console.error('Missing service worker asset: ' + item); }
+  }
+}
 console.log(`Checked ${checked} scripts and all page assets: ${failures} errors.`);
 process.exitCode = failures ? 1 : 0;

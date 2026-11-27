@@ -18,7 +18,7 @@ getCurrentUser((user) => {
     populateDeptSelect('patientDepartment');
     
     // Toggle Import Patients button for admin + receptionist
-    if (['admin', 'receptionist'].includes(currentUserRole)) {
+    if (['admin', 'receptionist'].includes(currentUserRole) || user.isAdmin === true) {
         var btnImport = document.getElementById('btnImportPatients');
         if (btnImport) btnImport.style.display = 'inline-block';
     }

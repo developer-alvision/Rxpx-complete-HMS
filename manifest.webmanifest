@@ -10,7 +10,8 @@
   "theme_color": "#111827",
   "shortcuts": [
     { "name": "OP Queue", "url": "op-queue.html", "description": "Token queue" },
-    { "name": "Patient Portal", "url": "portal.html", "description": "Attendant portal" },
+    { "name": "Appointments", "url": "appointments.html", "description": "Book and manage OP visits" },
+    { "name": "Billing", "url": "billing.html", "description": "Invoices and receipts" },
     { "name": "Maternity Care", "url": "maternity-care.html", "description": "ANC and vaccines" }
   ],
   "icons": [

@@ -57,7 +57,7 @@ exports.issueHospitalCertificate = onCall({ region: REGION }, async (request) =>
   if (required[input.type].some(key => data[key] === undefined || data[key] === null || String(data[key]).trim() === '')) throw new HttpsError('invalid-argument', 'Complete the required certificate fields.');
   if (data.restFrom && data.restTo && data.restTo < data.restFrom || data.fitFrom && data.validUntil && data.validUntil < data.fitFrom) throw new HttpsError('invalid-argument', 'Certificate date range is invalid.');
   const year = Number(new Intl.DateTimeFormat('en', { year: 'numeric', timeZone: 'Asia/Kolkata' }).format(new Date()));
-  const prefix = 'JYO/' + type.prefix + '/' + year + '/';
+  const prefix = 'RXPX/' + type.prefix + '/' + year + '/';
   const prior = await db.collection('certificates').where('certificateType', '==', input.type).get();
   let priorMax = 0;
   prior.forEach(doc => { const number = String(doc.get('certificateNo') || ''); if (number.startsWith(prefix) && /^\d+$/.test(number.slice(prefix.length))) priorMax = Math.max(priorMax, Number(number.slice(prefix.length))); });

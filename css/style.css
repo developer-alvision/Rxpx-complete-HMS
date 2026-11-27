@@ -883,36 +883,34 @@ td.actions > div {
     border-color: #C9C3B8;
 }
 
-/* --- Login — dark glowing brand panel (left), white form (right) --- */
+/* --- Login — clean white / light brand panel (left), white form (right) --- */
 .login-body {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: var(--primary-navy);
+    background: #F8FAFC;
     padding: 20px;
 }
 
 .login-container {
     display: flex;
     background: var(--white);
+    border: 1px solid var(--border-color);
     border-radius: 26px;
-    box-shadow: 0 40px 80px -24px rgba(0, 0, 0, 0.55);
+    box-shadow: 0 20px 48px -12px rgba(16, 24, 40, 0.1);
     overflow: hidden;
     width: 100%;
     max-width: 900px;
     min-height: 550px;
 }
 
-/* Brand side — near-black canvas with a warm orange glow bleeding
-   in from the top-right corner, matching the RxPx campaign art. */
+/* Brand side — warm, light RxPx brand canvas */
 .login-left {
     flex: 1;
-    background:
-        radial-gradient(560px 420px at 88% 12%, rgba(253, 146, 44, 0.5), transparent 62%),
-        radial-gradient(380px 300px at 100% 42%, rgba(253, 99, 11, 0.22), transparent 70%),
-        #1A1613;
-    color: var(--white);
+    background: linear-gradient(145deg, #FFF9F2 0%, #FFF2E2 100%);
+    border-right: 1px solid #FFE4C8;
+    color: var(--text-strong);
     padding: 44px 40px;
     display: flex;
     flex-direction: column;
@@ -939,8 +937,8 @@ td.actions > div {
     font-family: var(--font-display);
     font-size: 1.15rem;
     font-weight: 800;
-    color: var(--white);
-    background: rgba(253, 99, 11, 0.12);
+    color: var(--primary-teal);
+    background: rgba(253, 99, 11, 0.1);
 }
 
 .login-brand-text {
@@ -954,7 +952,7 @@ td.actions > div {
     font-size: 1.3rem;
     font-weight: 800;
     letter-spacing: -0.01em;
-    color: var(--white);
+    color: var(--text-strong);
 }
 
 .login-brand-text small {
@@ -962,7 +960,7 @@ td.actions > div {
     font-weight: 700;
     letter-spacing: 0.24em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.82);
+    color: var(--text-muted);
 }
 
 .login-kicker {
@@ -980,14 +978,14 @@ td.actions > div {
     line-height: 1.12;
     font-weight: 700;
     letter-spacing: -0.025em;
-    color: var(--white);
+    color: var(--text-strong);
     margin-bottom: 18px;
 }
 
 .login-copy {
     font-size: 0.95rem;
     line-height: 1.65;
-    color: rgba(255, 255, 255, 0.72);
+    color: var(--text-muted);
     margin-bottom: 30px;
     max-width: 34ch;
 }
@@ -1005,7 +1003,7 @@ td.actions > div {
     gap: 12px;
     font-size: 0.9rem;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.92);
+    color: var(--text-color);
 }
 
 .login-tick {
@@ -1305,10 +1303,26 @@ button:disabled, .btn-primary:disabled, .btn-secondary:disabled {
     .main-wrapper {
         margin-left: 0 !important;
         width: 100% !important;
+        min-width: 0 !important;
     }
     .navbar {
-        padding-left: 16px !important;
-        padding-right: 16px !important;
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+        gap: 8px !important;
+    }
+    .nav-title h2 {
+        font-size: 1rem !important;
+    }
+    .nav-user {
+        gap: 6px !important;
+        flex-shrink: 0 !important;
+    }
+    .user-info {
+        display: none !important;
+    }
+    .btn-logout {
+        padding: 6px 10px !important;
+        font-size: 0.8rem !important;
     }
     #mobileMenuBtn {
         display: block !important;

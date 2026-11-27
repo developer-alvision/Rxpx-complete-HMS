@@ -386,7 +386,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     getCurrentUser(function(user) {
         var role = (user.role || '').toLowerCase();
-        if (role === 'admin' || role === 'pharmacist') openButton.style.display = 'inline-flex';
+        if (role === 'admin' || role === 'pharmacist' || user.isAdmin === true) openButton.style.display = 'inline-flex';
     });
 
     openButton.addEventListener('click', openStockImportModal);

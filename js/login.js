@@ -36,7 +36,7 @@ document.getElementById("loginForm").addEventListener("submit", function(e) {
             auth.signOut();
             throw new Error("Your account has been deactivated. Contact administrator.");
           }
-          if (staffData.role === 'admin') {
+          if (staffData.role === 'admin' || staffData.isAdmin === true) {
             callFunction('applyHospitalPolicy').catch(function(error) {
               console.warn('Hospital catalog setup will retry on next administrator login:', error.message);
             });

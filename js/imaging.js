@@ -2,6 +2,7 @@ checkAccess(['lab_technician', 'doctor', 'nurse', 'admin', 'owner']);
 
 let currentUserEmail = '';
 let currentUserRole = '';
+let currentUserIsAdmin = false;
 let currentDoctorName = '';
 let allReports = [];
 var selectedPatient_img = null;
@@ -20,10 +21,11 @@ getCurrentUser((user) => {
     });
     currentUserEmail = user.email || '';
     currentUserRole = (user.role || '').toLowerCase();
+    currentUserIsAdmin = user.isAdmin === true;
     currentDoctorName = user.name || '';
     
     // Hide upload button for view-only roles
-    const canUpload = (currentUserRole === 'lab_technician' || currentUserRole === 'admin');
+    const canUpload = (currentUserRole === 'lab_technician' || currentUserRole === 'admin' || currentUserIsAdmin);
     const btnUpload = document.getElementById('uploadReportBtn') || document.getElementById('btnOpenUploadModal');
     if (btnUpload) btnUpload.style.display = canUpload ? 'inline-flex' : 'none';
 
@@ -358,7 +360,7 @@ function renderReports(reports) {
         const dateVal = report.reportDate || (report.createdAt ? formatDate(report.createdAt) : '—');
         
         // Check edit permission
-        const canEdit = (currentUserRole === 'lab_technician' || currentUserRole === 'admin');
+        const canEdit = (currentUserRole === 'lab_technician' || currentUserRole === 'admin' || currentUserIsAdmin);
         const editBtnHtml = canEdit ? `<button onclick="openEditReport('${report.id}')" class="btn-secondary" style="padding:4px 8px;font-size:0.8rem;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;"><i class="fa-solid fa-pen-to-square"></i> Edit</button>` : '';
 
         // Check view own only condition for Doctor

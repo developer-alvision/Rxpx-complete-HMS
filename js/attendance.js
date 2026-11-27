@@ -13,7 +13,7 @@ getCurrentUser(function(user) {
     
     // Toggle role-based permissions
     var role = (user.role || '').toLowerCase();
-    if (role === 'admin') {
+    if (role === 'admin' || user.isAdmin === true) {
         var els = document.querySelectorAll('.admin-owner-only');
         els.forEach(function(el) {
             el.style.display = 'block';

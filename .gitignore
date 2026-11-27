@@ -6,3 +6,4 @@ dist/
 test-results/
 handover/
 *.log
+*.zip

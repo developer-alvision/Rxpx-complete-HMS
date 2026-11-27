@@ -1,45 +1,53 @@
 /*
  * Service worker — offline shell and controlled updates.
  *
- * Firestore already caches DATA offline (enablePersistence in
- * helpers.js). What was missing is the APP: without this, losing the
- * connection and refreshing gave a blank browser error, because the
- * HTML, CSS and scripts still had to come from the network. The
- * pharmacy was the most obvious casualty — the till stopped working
- * the moment the line dropped.
+ * Local standalone storage keeps the hospital data available offline;
+ * the service worker caches the HTML, CSS, and scripts for fast offline
+ * startup and controlled updates.
  *
  * Strategy:
  *   HTML  network-first, falling back to cache, so staff normally get
  *         the newest page but still get a working one when offline.
  *   CSS / JS / images  cache-first with a background refresh, so pages
  *         paint instantly and update quietly.
- *   Firebase / Google traffic  never touched — the SDK handles its own
- *         offline behaviour and caching it would break auth.
  *
  * Bump CACHE_VERSION on every deploy. Old caches are deleted on
- * activate, which is also what finally kills the stale-CSS problem.
+ * activate, which clears any stale CSS or scripts.
  */
-const CACHE_VERSION = 'rxpx-v1-20261127';
+const CACHE_VERSION = 'rxpx-v3-20261127';
 const APP_SHELL = [
     './',
     'index.html',
     'dashboard.html',
+    'doctor-dashboard.html',
     'patients.html',
-    'billing.html',
-    'pharmacy.html',
+    'patient-profile.html',
     'appointments.html',
-    'accounts.html',
-    'certificates.html',
+    'op-queue.html',
+    'consultation.html',
+    'consultations.html',
+    'lab-reports.html',
+    'imaging.html',
+    'billing.html',
+    'today-collections.html',
+    'pharmacy.html',
+    'inventory-alerts.html',
     'maternity-care.html',
     'partograph.html',
+    'bed-management.html',
+    'ot-schedule.html',
     'discharge.html',
-    'op-queue.html',
-    'inventory-alerts.html',
+    'certificates.html',
+    'accounts.html',
+    'attendance.html',
+    'admin.html',
     'css/style.css',
     'js/local-db.js',
     'js/helpers.js',
     'js/hospital-policy.js',
     'js/hospital-forms.js',
+    'js/login.js',
+    'js/dashboard.js',
     'js/i18n.js',
     'js/branch.js',
     'images/logo.png',
@@ -98,8 +106,10 @@ self.addEventListener('fetch', (event) => {
         event.respondWith(
             fetch(request)
                 .then((response) => {
-                    const copy = response.clone();
-                    caches.open(CACHE_VERSION).then((cache) => cache.put(request, copy));
+                    if (response && response.ok) {
+                        const copy = response.clone();
+                        caches.open(CACHE_VERSION).then((cache) => cache.put(request, copy));
+                    }
                     return response;
                 })
                 .catch(() => caches.match(request).then((cached) =>

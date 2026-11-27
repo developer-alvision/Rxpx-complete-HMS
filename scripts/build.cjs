@@ -6,6 +6,7 @@ require('./build-functions.cjs');
 const out = path.join(root, 'dist');
 // The same confirmed price list is used by browser defaults and server setup.
 fs.copyFileSync(path.join(root, 'js/hospital-policy.js'), path.join(root, 'functions/hospital-policy.cjs'));
+fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
 const excluded = new Set(['setup.html', 'setup-admissions.html']);
 const sdk = /https:\/\/www\.gstatic\.com\/firebasejs\/[\d.]+\/(firebase-[a-z-]+\.js)/g;
@@ -20,10 +21,14 @@ for (const dir of ['css', 'images', 'js']) {
     recursive: true, filter: source => !/^setup(?:-demo|-admissions)?\.js$/.test(path.basename(source))
   });
 }
-fs.mkdirSync(path.join(out, 'vendor'), { recursive: true });
-for (const name of ['app', 'auth', 'firestore', 'functions', 'storage']) {
-  const file = `firebase-${name}-compat.js`;
-  fs.copyFileSync(path.join(root, 'node_modules', 'firebase', file), path.join(out, 'vendor', file));
+const firebaseVendorDir = path.join(root, 'node_modules', 'firebase');
+if (fs.existsSync(firebaseVendorDir)) {
+  fs.mkdirSync(path.join(out, 'vendor'), { recursive: true });
+  for (const name of ['app', 'auth', 'firestore', 'functions', 'storage']) {
+    const file = `firebase-${name}-compat.js`;
+    const src = path.join(firebaseVendorDir, file);
+    if (fs.existsSync(src)) fs.copyFileSync(src, path.join(out, 'vendor', file));
+  }
 }
 fs.writeFileSync(path.join(out, 'vercel.json'), JSON.stringify({
   version: 2,

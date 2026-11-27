@@ -173,7 +173,7 @@ const PAGE_ROLES = {
     'dashboard.html': ['admin', 'owner', 'receptionist', 'billing_staff', 'doctor', 'nurse', 'lab_technician', 'pharmacist'],
     'doctor-dashboard.html': ['admin', 'doctor'],
     'appointments.html': ['admin', 'receptionist', 'doctor'],
-    'patients.html': ['admin', 'receptionist', 'nurse'],
+    'patients.html': ['admin', 'receptionist', 'nurse', 'doctor'],
     'patient-profile.html': ['admin', 'owner', 'receptionist', 'billing_staff', 'doctor', 'nurse'],
     'consultations.html': ['admin', 'owner', 'doctor'],
     'consultation.html': ['admin', 'doctor'],
@@ -182,7 +182,7 @@ const PAGE_ROLES = {
     'pharmacy.html': ['admin', 'pharmacist'],
     'billing.html': ['admin', 'receptionist', 'billing_staff'],
     'today-collections.html': ['admin', 'owner', 'receptionist', 'billing_staff'],
-    'bed-management.html': ['admin', 'receptionist', 'nurse'],
+    'bed-management.html': ['admin', 'receptionist', 'nurse', 'doctor', 'owner'],
     'ot-schedule.html': ['admin', 'doctor', 'receptionist'],
     'attendance.html': ['admin', 'owner', 'receptionist'],
     'certificates.html': ['admin', 'doctor', 'nurse', 'receptionist'],
@@ -196,6 +196,15 @@ const PAGE_ROLES = {
     'op-queue.html': ['admin', 'receptionist', 'doctor', 'nurse'],
     'inventory-alerts.html': ['admin', 'pharmacist', 'owner']
 };
+
+function isUserAllowed(user, allowed) {
+    if (!user || !Array.isArray(allowed)) return false;
+    var role = (user.role || '').toLowerCase();
+    if (allowed.indexOf(role) !== -1) return true;
+    if ((user.isAdmin === true || user.isAdmin === 'true') && allowed.indexOf('admin') !== -1) return true;
+    return false;
+}
+window.isUserAllowed = isUserAllowed;
 
 function checkPageAccess(user) {
     if (!user || !user.role) {
@@ -212,9 +221,8 @@ function checkPageAccess(user) {
     const pageRaw = window.location.pathname.split('/').pop() || 'dashboard.html';
     const page = pageRaw.split('?')[0].split('#')[0] || 'dashboard.html';
     const allowed = PAGE_ROLES[page];
-    const role = (user.role || '').toLowerCase();
     
-    if (!allowed || !allowed.includes(role)) {
+    if (!allowed || !isUserAllowed(user, allowed)) {
         showToast('Access denied: You do not have permission to access this page.', 'error');
         setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
         return false;
@@ -275,7 +283,7 @@ const MENU_GROUPS = [
 // Flat list kept for PAGE_ROLES consumers / search
 const MENU_ITEMS = MENU_GROUPS.reduce(function (acc, g) { return acc.concat(g.items); }, []);
 
-function buildSidebar(role) {
+function buildSidebar(role, isAdmin) {
     const nav = document.querySelector('.sidebar-nav');
     if (!nav) return;
     
@@ -288,12 +296,16 @@ function buildSidebar(role) {
     }
     
     const r = (role || '').toLowerCase();
+    const adminFlag = isAdmin === true || isAdmin === 'true' || Boolean(_cachedCurrentUser && (_cachedCurrentUser.isAdmin === true || _cachedCurrentUser.isAdmin === 'true'));
     const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
     let html = '';
     const collapsed = JSON.parse(localStorage.getItem('hms_nav_collapsed') || '{}');
 
     MENU_GROUPS.forEach(function (group) {
-        const visible = group.items.filter(function (item) { return (PAGE_ROLES[item.href] || []).includes(r); });
+        const visible = group.items.filter(function (item) {
+            var roles = PAGE_ROLES[item.href] || [];
+            return roles.includes(r) || (adminFlag && roles.includes('admin'));
+        });
         if (!visible.length) return;
         const isCollapsed = collapsed[group.id] === true;
         const hasActive = visible.some(function (item) { return item.href === currentPage; });
@@ -327,8 +339,7 @@ window.toggleNavGroup = function (id) {
 
 function checkAccess(allowedRoles) {
     getCurrentUser((user) => {
-        const role = (user.role || '').toLowerCase();
-        if (!allowedRoles.includes(role)) {
+        if (!isUserAllowed(user, allowedRoles)) {
             showToast('Access denied: You do not have permission to view this page.', 'error');
             setTimeout(() => {
                 window.location.href = 'dashboard.html';
@@ -405,8 +416,8 @@ function getCurrentUser(onSuccess) {
 
                     if (userEmailEl) userEmailEl.textContent = staffData.name || user.email;
                     const adminNav = document.getElementById('adminNav');
-                    if (adminNav && userData.role === 'admin') adminNav.style.display = 'flex';
-                    buildSidebar(userData.role);
+                    if (adminNav && (userData.role === 'admin' || userData.isAdmin === true)) adminNav.style.display = 'flex';
+                    buildSidebar(userData.role, userData.isAdmin === true);
 
                     _cachedCurrentUser = userData;
 
@@ -741,7 +752,7 @@ function showUpdatePrompt(registration) {
 // realistic problem (one password quietly shared around the desk),
 // but a determined user with the credentials could bypass it.
 // ==========================================
-var SESSION_KEY = 'jyothsna.sessionId';
+var SESSION_KEY = 'rxpx.sessionId';
 var _sessionWatcher = null;
 var _sessionSignOutInProgress = false;
 
@@ -1040,7 +1051,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
     // Bottom-left and click-through: at top-right it sat directly on top of
     // the Logout button and swallowed clicks aimed at it.
     _demoBadge.style.cssText = 'position:fixed;bottom:10px;left:10px;background:#D97706;color:white;padding:4px 10px;border-radius:12px;font-size:10px;font-weight:600;z-index:99997;box-shadow:0 2px 6px rgba(0,0,0,0.15);letter-spacing:0.5px;pointer-events:none;opacity:0.85;';
-    _demoBadge.textContent = 'LOCAL EMULATORS · DEMO DATA';
+    _demoBadge.textContent = window.IS_LOCAL_DB ? 'LOCAL OFFLINE MODE' : 'LOCAL EMULATORS · DEMO DATA';
     document.addEventListener('DOMContentLoaded', function() { document.body.appendChild(_demoBadge); });
 }
 
