@@ -635,17 +635,17 @@
     var SEED_STAFF = {
         'admin': {
             uid: 'admin', id: 'admin', docId: 'admin',
-            name: 'RxPx Administrator', email: 'admin@rxpx.in',
+            name: 'RxPx Administrator', email: 'admin@rxpx.com',
             role: 'admin', isAdmin: true, department: 'Administration', isActive: true, hasLogin: true, phone: '9949979578'
         },
         'reception': {
             uid: 'reception', id: 'reception', docId: 'reception',
-            name: 'Reception Desk', email: 'reception@rxpx.in',
+            name: 'Reception Desk', email: 'reception@rxpx.com',
             role: 'receptionist', department: 'Reception', isActive: true, hasLogin: true, phone: '9949979578'
         },
         'pooja': {
             uid: 'pooja', id: 'pooja', docId: 'pooja',
-            name: 'Dr. G. Pooja', email: 'pooja@rxpx.in',
+            name: 'Dr. G. Pooja', email: 'pooja@rxpx.com',
             role: 'doctor', isAdmin: true,
             specialisation: 'Obstetrician and Gynaecologist (MBBS, MS OBG)',
             services: ['Normal Delivery', 'C-Section', 'Antenatal Care', 'PCOD / PCOS Management', 'Fibroids Management', 'Family Planning', 'Infertility Evaluation & Treatment', 'Cancer Screening', 'Menstrual Cycle Issues', 'Menopause Care', 'Vaccinations', "General Women's Health Care"],
@@ -654,7 +654,7 @@
         },
         'ramakanth': {
             uid: 'ramakanth', id: 'ramakanth', docId: 'ramakanth',
-            name: 'Dr. Ramakanth Reddy', email: 'ramakanth@rxpx.in',
+            name: 'Dr. Ramakanth Reddy', email: 'ramakanth@rxpx.com',
             role: 'doctor', isAdmin: true,
             specialisation: 'Family Physician & Diabetologist (Director)',
             services: ['Diabetes Screening & Diagnosis', 'Personalized Diet & Lifestyle Guidance', 'Diabetes Management Programs', 'General Medicine Care', 'Patient Education & Support', 'Regular Sugar Monitoring', 'Personalized Treatment & Insulin Care', 'Heart Health & Complication Prevention'],
@@ -663,13 +663,13 @@
         },
         'lab': {
             uid: 'lab', id: 'lab', docId: 'lab',
-            name: 'Laboratory Desk', email: 'lab@rxpx.in',
+            name: 'Laboratory Desk', email: 'lab@rxpx.com',
             role: 'lab_technician', department: 'Laboratory',
             isActive: true, hasLogin: true, phone: '9949979578'
         },
         'pharmacy': {
             uid: 'pharmacy', id: 'pharmacy', docId: 'pharmacy',
-            name: 'Pharmacy Desk', email: 'pharmacy@rxpx.in',
+            name: 'Pharmacy Desk', email: 'pharmacy@rxpx.com',
             role: 'pharmacist', department: 'Pharmacy',
             isActive: true, hasLogin: true, phone: '9949979578'
         }
@@ -713,15 +713,21 @@
 
         Object.keys(col).forEach(function (k) {
             var s = col[k];
-            if (s && s.email && (s.email.toLowerCase() === lower || s.email.toLowerCase().split('@')[0] === prefix)) {
-                matched = Object.assign({ uid: s.uid || k, id: k, docId: k }, s);
-                matchedKey = k;
+            if (s && s.email) {
+                var sLower = s.email.toLowerCase();
+                var sPrefix = sLower.split('@')[0];
+                if (sLower === lower || sPrefix === prefix || (sPrefix + '@rxpx.com' === lower) || (sPrefix + '@rxpx.in' === lower)) {
+                    matched = Object.assign({ uid: s.uid || k, id: k, docId: k }, s);
+                    matchedKey = k;
+                }
             }
         });
         if (!matched) {
             Object.keys(SEED_STAFF).forEach(function (k) {
                 var s = SEED_STAFF[k];
-                if (s.email.toLowerCase() === lower || s.uid.toLowerCase() === lower || s.uid.toLowerCase() === prefix || s.name.toLowerCase() === lower) {
+                var sLower = s.email.toLowerCase();
+                var sPrefix = s.uid.toLowerCase();
+                if (sLower === lower || sPrefix === prefix || (sPrefix + '@rxpx.com' === lower) || (sPrefix + '@rxpx.in' === lower) || s.name.toLowerCase() === lower) {
                     matched = Object.assign({}, s);
                     matchedKey = k;
                 }
@@ -849,7 +855,7 @@
                     existing[field] = Array.isArray(seed[field]) ? seed[field].slice() : seed[field];
                 });
             }
-            if (!localAuthCol[k] || (k === 'reception' && localAuthCol[k].password !== 'Receptionist@12345')) {
+            if (!localAuthCol[k] || localAuthCol[k].email !== seed.email || (k === 'reception' && localAuthCol[k].password !== 'Receptionist@12345')) {
                 localAuthCol[k] = { uid: k, email: seed.email, password: _SEED_PASSWORDS[k] };
                 authChanged = true;
             }
