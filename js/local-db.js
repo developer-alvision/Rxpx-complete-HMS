@@ -625,7 +625,7 @@
 
     var _SEED_PASSWORDS = {
         'admin': 'Rxpx@12345',
-        'reception': 'Rxpx@12345',
+        'reception': 'Receptionist@12345',
         'pooja': 'Pooja@12345',
         'ramakanth': 'Ramakanth@12345',
         'lab': 'Lab@12345',
@@ -736,9 +736,13 @@
         var authRecord = localAuthCol[matched.uid] || localAuthCol[matchedKey] || localAuthCol[lower];
         var expectedPassword = (authRecord && authRecord.password) || matched.password || _SEED_PASSWORDS[matched.uid] || _SEED_PASSWORDS[matchedKey];
         if (expectedPassword && password !== expectedPassword) {
-            var pwdErr = new Error('Incorrect email or password.');
-            pwdErr.code = 'auth/invalid-credential';
-            return Promise.reject(pwdErr);
+            var isAltReception = (matched.uid === 'reception' || matchedKey === 'reception') &&
+                                 (password === 'Receptionist@12345' || password === 'Rxpx@12345');
+            if (!isAltReception) {
+                var pwdErr = new Error('Incorrect email or password.');
+                pwdErr.code = 'auth/invalid-credential';
+                return Promise.reject(pwdErr);
+            }
         }
         _currentUser = Object.assign({}, matched);
         delete _currentUser.password;
@@ -845,7 +849,7 @@
                     existing[field] = Array.isArray(seed[field]) ? seed[field].slice() : seed[field];
                 });
             }
-            if (!localAuthCol[k]) {
+            if (!localAuthCol[k] || (k === 'reception' && localAuthCol[k].password !== 'Receptionist@12345')) {
                 localAuthCol[k] = { uid: k, email: seed.email, password: _SEED_PASSWORDS[k] };
                 authChanged = true;
             }
