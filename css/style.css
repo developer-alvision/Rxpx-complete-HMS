@@ -921,46 +921,14 @@ td.actions > div {
 .login-brandlock {
     display: flex;
     align-items: center;
-    gap: 13px;
-    margin-bottom: 42px;
+    margin-bottom: 36px;
 }
 
-.login-logo-mark {
-    width: 46px;
-    height: 46px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2.5px solid var(--primary-teal);
-    border-radius: 14px;
-    font-family: var(--font-display);
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: var(--primary-teal);
-    background: rgba(253, 99, 11, 0.1);
-}
-
-.login-brand-text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.15;
-}
-
-.login-brand-text strong {
-    font-family: var(--font-display);
-    font-size: 1.3rem;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    color: var(--text-strong);
-}
-
-.login-brand-text small {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-    color: var(--text-muted);
+.login-brand-logo {
+    max-height: 64px;
+    max-width: 240px;
+    object-fit: contain;
+    display: block;
 }
 
 .login-kicker {
@@ -1382,7 +1350,7 @@ button:disabled, .btn-primary:disabled, .btn-secondary:disabled {
 }
 
 /* ==========================================
-   APP FOOTER — Alvision Media
+   APP FOOTER — RxPx Hospitals
    brand | shortcuts | copyright
    ========================================== */
 .app-footer {

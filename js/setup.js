@@ -1086,7 +1086,7 @@ window.setupOTBookings = setupOTBookings;
 
 async function setupAll() {
     setButtonsDisabled(true);
-    log('Starting complete Alvision HMS setup...', 'info');
+    log('Starting complete RxPx Hospitals setup...', 'info');
     try {
         await ensureSignedIn();
         await setupHospitalSettings();
@@ -1306,7 +1306,7 @@ async function clearAllData() {
         // Hide summary card
         document.getElementById('summaryCard').style.display = 'none';
 
-        logToConsole('Alvision HMS database successfully cleared (Staff, Medicines & Beds kept intact)!', 'success');
+        logToConsole('RxPx Hospitals database successfully cleared (Staff, Medicines & Beds kept intact)!', 'success');
     } catch (err) {
         logToConsole(`Error during purge: ${err.message}`, 'error');
         console.error(err);

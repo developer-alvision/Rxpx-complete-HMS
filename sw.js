@@ -14,7 +14,7 @@
  * Bump CACHE_VERSION on every deploy. Old caches are deleted on
  * activate, which clears any stale CSS or scripts.
  */
-const CACHE_VERSION = 'rxpx-v3-20261127';
+const CACHE_VERSION = 'rxpx-v4-20261127';
 const APP_SHELL = [
     './',
     'index.html',

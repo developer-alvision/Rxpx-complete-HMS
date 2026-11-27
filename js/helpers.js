@@ -290,8 +290,7 @@ function buildSidebar(role, isAdmin) {
     const header = document.querySelector('.sidebar-header');
     if (header) {
         header.innerHTML = `
-            <img src="images/logo.png" alt="RxPx Logo" style="height: 38px; width: 38px; border-radius: 8px; object-fit: contain; background: white; margin-right: 10px; border: 1px solid var(--border-color); padding: 2px;">
-            <span style="font-size: 1.05rem; font-weight: 700; letter-spacing: 0.5px; color: var(--text-strong);">RxPx Hospitals</span>
+            <img src="images/logo-banner.png" alt="RxPx Hospitals" style="max-height: 40px; max-width: 200px; object-fit: contain;">
         `;
     }
     
@@ -848,18 +847,17 @@ window.watchSession = watchSession;
 // -------------------------------------------------------------------------
 // ATTRIBUTION
 //
-//   Product   : Alvision HMS
-//   Vendor    : Alvision Media
-//   Owner     : Alvision Media
+//   Product   : RxPx Hospitals
+//   Hospital  : RxPx Hospitals, Pulivendula
 //
 // Frozen below so application code cannot overwrite it at runtime.
 // -------------------------------------------------------------------------
 var PRODUCT = Object.freeze({
-    name: 'Alvision HMS',
-    design: 'Alvision Media',
-    vendor: 'Alvision Media',
-    owner: 'Alvision Media',
-    author: 'Alvision Media'
+    name: 'RxPx Hospitals',
+    design: 'RxPx Hospitals',
+    vendor: 'RxPx Hospitals',
+    owner: 'RxPx Hospitals',
+    author: 'RxPx Hospitals'
 });
 try {
     Object.defineProperty(window, 'PRODUCT', {
@@ -882,10 +880,10 @@ function renderAppFooter() {
     footer.innerHTML =
         '<div class="app-footer-inner">'
         +   '<div class="app-footer-brand">'
-        +     '<div class="app-footer-mark" aria-hidden="true">AV</div>'
+        +     '<img src="images/logo-banner.png" alt="RxPx" style="height:24px;max-width:120px;object-fit:contain;">'
         +     '<div class="app-footer-brand-text">'
         +       '<div class="app-footer-name">' + escapeHtml(PRODUCT.name) + '</div>'
-        +       '<div class="app-footer-sub">Hospital Management Platform</div>'
+        +       '<div class="app-footer-sub">Pulivendula</div>'
         +     '</div>'
         +   '</div>'
         +   '<div class="app-footer-copy">&copy; ' + year + ' ' + escapeHtml(PRODUCT.vendor) + ' &middot; All rights reserved</div>'
