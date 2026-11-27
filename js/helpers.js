@@ -2564,7 +2564,7 @@ function ensureLabImagingQueuesForBill(billDocId, bill) {
         var existingLab = {};
         res[0].forEach(function (d) {
             var t = (d.data().testName || '').toLowerCase();
-            existingLab[t] = true;
+            existingLab[t] = { ref: d.ref, data: d.data() };
         });
         var existingImg = {};
         res[1].forEach(function (d) {
@@ -2573,15 +2573,32 @@ function ensureLabImagingQueuesForBill(billDocId, bill) {
         });
         var batch = db.batch();
         var isEmergency = !!bill.isEmergency;
+        var billPaymentStatus = String(bill.paymentStatus || bill.status || '').toLowerCase();
+        var paymentAuthorized = billPaymentStatus && billPaymentStatus !== 'unpaid' && billPaymentStatus !== 'draft';
         labItems.forEach(function (item) {
             var name = item.description || item.category || 'Lab test';
-            if (existingLab[name.toLowerCase()]) return;
+            var existing = existingLab[name.toLowerCase()];
+            if (existing) {
+                var queueUpdate = {
+                    billingStatus: billPaymentStatus || 'unpaid',
+                    paymentStatus: billPaymentStatus || 'unpaid',
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                if (paymentAuthorized && String(existing.data.reportStatus || '').toLowerCase() === 'awaiting_payment') {
+                    queueUpdate.reportStatus = 'pending';
+                    queueUpdate.authorizationStatus = 'authorized';
+                    queueUpdate.authorizedAt = firebase.firestore.FieldValue.serverTimestamp();
+                }
+                batch.update(existing.ref, queueUpdate);
+                return;
+            }
             var ref = db.collection('labQueue').doc();
             batch.set(ref, {
                 queueId: ref.id,
                 billId: bill.billId || bill.billNo || '',
                 billDocId: billDocId,
                 patientId: bill.patientId || '',
+                patientDocId: bill.patientDocId || '',
                 patientName: bill.patientName || '',
                 patientPhone: bill.patientPhone || '',
                 testName: name,
@@ -2589,13 +2606,16 @@ function ensureLabImagingQueuesForBill(billDocId, bill) {
                 visitDoctor: bill.visitDoctor || bill.doctorName || '',
                 labNotes: bill.labNotes || '',
                 reportStatus: 'pending',
+                billingStatus: billPaymentStatus || 'paid',
+                paymentStatus: billPaymentStatus || 'paid',
+                authorizationStatus: 'authorized',
                 reportId: null,
                 isEmergency: isEmergency,
                 source: 'billing',
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 createdBy: (typeof currentUserEmail !== 'undefined' ? currentUserEmail : '') || ''
             });
-            existingLab[name.toLowerCase()] = true;
+            existingLab[name.toLowerCase()] = { ref: ref, data: { reportStatus: 'pending' } };
         });
         imgItems.forEach(function (item) {
             var name = item.description || item.category || 'Scan';
@@ -2624,9 +2644,10 @@ function ensureLabImagingQueuesForBill(billDocId, bill) {
         });
         res[2].forEach(function (d) {
             var r = d.data();
-            if (String(r.billingStatus || '').toLowerCase() === 'unpaid' || String(r.billingStatus || '').toLowerCase() === 'unbilled') {
+            var currentBillingStatus = String(r.billingStatus || '').toLowerCase();
+            if (billPaymentStatus === 'paid' || currentBillingStatus === 'unpaid' || currentBillingStatus === 'unbilled') {
                 batch.update(d.ref, {
-                    billingStatus: 'billed',
+                    billingStatus: billPaymentStatus === 'paid' ? 'paid' : 'billed',
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
             }

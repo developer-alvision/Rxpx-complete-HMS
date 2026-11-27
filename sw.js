@@ -19,7 +19,7 @@
  * Bump CACHE_VERSION on every deploy. Old caches are deleted on
  * activate, which is also what finally kills the stale-CSS problem.
  */
-const CACHE_VERSION = 'rxpx-v1-20261124';
+const CACHE_VERSION = 'rxpx-v1-20261127';
 const APP_SHELL = [
     './',
     'index.html',

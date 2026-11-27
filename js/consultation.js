@@ -18,8 +18,27 @@ let activeConsultationId = '';
 let consultationSaving = false;
 let consultationReady = false;
 
-// Common Lab Tests List with default OPD prices
+// Complete photographed lab catalog with default prices. The displayed list
+// is narrowed by the signed-in doctor's department, while this full list is
+// kept for loading older drafts and preserving existing orders.
 const COMMON_LAB_TESTS = window.HOSPITAL_POLICY ? HOSPITAL_POLICY.labs : [];
+
+function getDepartmentLabTests() {
+    const department = String(currentDoctorDept || '').toLowerCase();
+    const identity = [currentDoctorId, currentDoctor && currentDoctor.uid, currentDoctor && currentDoctor.email]
+        .filter(Boolean).join(' ').toLowerCase();
+    const isWomenHealthDoctor = /obstetric|gynaec|gynec|women|pooja/.test(department + ' ' + identity);
+    const isFamilyMedicineDoctor = /family medicine|diabetology|ramakanth/.test(department + ' ' + identity);
+
+    if (isWomenHealthDoctor) {
+        return COMMON_LAB_TESTS.filter(function (test) { return test.womenHealth === true; });
+    }
+    if (isFamilyMedicineDoctor) {
+        return COMMON_LAB_TESTS.filter(function (test) { return test.womenHealth !== true; });
+    }
+    return COMMON_LAB_TESTS.slice();
+}
+window.getDepartmentLabTests = getDepartmentLabTests;
 
 // Common Imaging Scans List with default prices
 const COMMON_IMAGING_TESTS = window.HOSPITAL_POLICY ? HOSPITAL_POLICY.imaging : [];
@@ -75,10 +94,26 @@ getCurrentUser((user) => {
 function renderDiagnosticGrids() {
     const labGrid = document.getElementById('labTestsGrid');
     const imgGrid = document.getElementById('imagingTestsGrid');
+    const visibleLabTests = getDepartmentLabTests();
+    const labScopeNote = document.getElementById('labTestScopeNote');
+
+    if (labScopeNote) {
+        const department = String(currentDoctorDept || '').toLowerCase();
+        const identity = [currentDoctorId, currentDoctor && currentDoctor.uid, currentDoctor && currentDoctor.email]
+            .filter(Boolean).join(' ').toLowerCase();
+        const scope = department + ' ' + identity;
+        if (/obstetric|gynaec|gynec|women|pooja/.test(scope)) {
+            labScopeNote.textContent = 'Women’s health investigations for Obstetrics & Gynaecology. Prices can be edited before submitting.';
+        } else if (/family medicine|diabetology|ramakanth/.test(scope)) {
+            labScopeNote.textContent = 'General and family-medicine investigations. Prices can be edited before submitting.';
+        } else {
+            labScopeNote.textContent = 'Select an investigation to edit its price before submitting.';
+        }
+    }
     
     // 1. Lab grid
     labGrid.innerHTML = '';
-    COMMON_LAB_TESTS.forEach(test => {
+    visibleLabTests.forEach(test => {
         const item = document.createElement('div');
         item.className = 'test-item';
         item.innerHTML = `
@@ -86,7 +121,7 @@ function renderDiagnosticGrids() {
                 <input type="checkbox" class="lab-check" data-name="${test.name}" value="${test.id}" onchange="toggleTestAmount(this)">
                 <span>${test.name}</span>
             </label>
-            <input type="number" class="amount-input" id="amt_lab_${test.id}" value="${test.price}">
+            <input type="number" class="amount-input" id="amt_lab_${test.id}" value="${test.price}" min="0" step="0.01" aria-label="Price for ${test.name}" title="Manual price (₹)">
         `;
         labGrid.appendChild(item);
     });
@@ -100,7 +135,7 @@ function renderDiagnosticGrids() {
             <input type="checkbox" class="lab-check custom-test-check" data-name="Custom Lab" value="CustomLab" onchange="toggleTestAmount(this)">
             <input type="text" placeholder="Custom Lab Test Name" id="name_lab_CustomLab" class="rx-input" style="height:28px; font-size:0.8rem; width:80%;" readonly>
         </label>
-        <input type="number" class="amount-input" id="amt_lab_CustomLab" value="300">
+        <input type="number" class="amount-input" id="amt_lab_CustomLab" value="300" min="0" step="0.01" aria-label="Price for custom lab test" title="Manual price (₹)">
     `;
     labGrid.appendChild(customLab);
     
@@ -114,7 +149,7 @@ function renderDiagnosticGrids() {
                 <input type="checkbox" class="img-check" data-name="${test.name}" value="${test.id}" onchange="toggleTestAmount(this)">
                 <span>${test.name}</span>
             </label>
-            <input type="number" class="amount-input" id="amt_img_${test.id}" value="${test.price}">
+            <input type="number" class="amount-input" id="amt_img_${test.id}" value="${test.price}" min="0" step="0.01" aria-label="Price for ${test.name}" title="Manual price (₹)">
         `;
         imgGrid.appendChild(item);
     });
@@ -128,7 +163,7 @@ function renderDiagnosticGrids() {
             <input type="checkbox" class="img-check custom-test-check" data-name="Custom Imaging" value="CustomImg" onchange="toggleTestAmount(this)">
             <input type="text" placeholder="Custom Imaging Scan Name" id="name_img_CustomImg" class="rx-input" style="height:28px; font-size:0.8rem; width:80%;" readonly>
         </label>
-        <input type="number" class="amount-input" id="amt_img_CustomImg" value="1000">
+        <input type="number" class="amount-input" id="amt_img_CustomImg" value="1000" min="0" step="0.01" aria-label="Price for custom imaging scan" title="Manual price (₹)">
     `;
     imgGrid.appendChild(customImg);
 }
@@ -691,6 +726,7 @@ function saveConsultation(isDraft) {
         patientId: currentPatient.patientId,
         patientDocId: currentPatient.id,
         patientName: currentPatient.name,
+        patientPhone: currentPatient.phone || '',
         encounterId: currentPatient.encounterId || window._linkedEncounterId || '',
         doctorName: currentDoctorName,
         doctorId: currentDoctorId,
@@ -776,9 +812,10 @@ async function triggerDownstreamActions(consultation) {
         var billRef = db.collection('bills').doc(); // Auto-generated unique doc ID
         
         // Doctor orders stay AWAITING BILLING — do NOT push to lab/imaging work queues
-        // until reception bills / payment is recorded (Indian hospital billing gate).
+        // Legacy wording above is superseded: the queue is visible now and read-only until reception records payment.
         consultation.labOrders.forEach(function(test) {
             var reportRef = db.collection('reports').doc();
+            var labQueueRef = db.collection('labQueue').doc();
             batch.set(reportRef, {
                 reportId: 'SA-LAB-' + new Date().getFullYear() + '-' + Math.floor(Math.random() * 90000 + 10000),
                 patientId: consultation.patientId,
@@ -794,9 +831,34 @@ async function triggerDownstreamActions(consultation) {
                 source: 'doctor_order',
                 linkedBillId: billId,
                 billDocId: billRef.id,
+                labQueueId: labQueueRef.id,
                 consultationId: consultation.consultationId,
                 retainUntil: firebase.firestore.Timestamp.fromDate(new Date(Date.now() + 3 * 365 * 24 * 60 * 60 * 1000)),
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            batch.set(labQueueRef, {
+                queueId: labQueueRef.id,
+                billId: billId,
+                billDocId: billRef.id,
+                patientId: consultation.patientId,
+                patientDocId: consultation.patientDocId || '',
+                patientName: consultation.patientName,
+                patientPhone: consultation.patientPhone || '',
+                testName: test.name,
+                amount: test.amount,
+                visitDoctor: consultation.doctorName,
+                visitDepartment: consultation.department,
+                labNotes: consultation.labNotes || '',
+                reportStatus: 'awaiting_payment',
+                billingStatus: 'unpaid',
+                paymentStatus: 'unpaid',
+                authorizationStatus: 'awaiting_payment',
+                reportId: reportRef.id,
+                consultationId: consultation.consultationId,
+                isEmergency: false,
+                source: 'doctor_order',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                createdBy: currentDoctorName || ''
             });
         });
 
@@ -865,6 +927,7 @@ async function triggerDownstreamActions(consultation) {
             encounterId: consultation.encounterId || '',
             patientDocId: consultation.patientDocId,
             patientName: consultation.patientName,
+            patientPhone: consultation.patientPhone || '',
             billType: 'OPD',
             visitDoctor: consultation.doctorName,
             visitDepartment: consultation.department,

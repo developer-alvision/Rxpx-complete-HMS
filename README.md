@@ -59,3 +59,4 @@ Staff accounts must have an active `/staff/{auth.uid}` profile with an allowed r
 
 The patient portal requires a PIN assigned by authorized staff. The public queue displays tokens and doctors without publishing patient identities. Production clinical workflows, fees and document templates should be reviewed by hospital staff before operational use.
 # JHMS
+# Rxpx-complete-HMS

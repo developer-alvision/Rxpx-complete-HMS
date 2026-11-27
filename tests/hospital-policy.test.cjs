@@ -1,12 +1,17 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { policy, calculateFee } = require('../js/hospital-policy.js');
-test('photographed catalog has 35 labs and exactly the four hospital imaging tests', () => {
-    assert.equal(policy.labs.length, 35);
-    assert.equal(policy.labs.find(item => item.id === 'CBC').price, 300);
-    assert.equal(policy.labs.find(item => item.id === 'Thyroid').price, 500);
-    assert.equal(policy.labs.find(item => item.id === 'TSH').price, 600);
-    assert.deepEqual(policy.imaging.map(item => [item.name, item.price]), [['ECG', 500], ['CTG', 500], ['USG Abdomen', 500], ['Vaginal Scan', 550]]);
+test('photographed catalog has 50 labs with the pictured prices and department routing', () => {
+    assert.equal(policy.labs.length, 50);
+    assert.deepEqual(
+        policy.labs.slice(0, 5).map(item => [item.name, item.price]),
+        [['Complete Blood Picture (CBP)', 250], ['Blood Grouping', 50], ['ESR', 100], ['FBS', 50], ['PPBS', 50]]
+    );
+    assert.equal(policy.labs.find(item => item.id === 'HbA1c').price, 500);
+    assert.equal(policy.labs.find(item => item.id === 'AMH').price, 2000);
+    assert.equal(policy.labs.find(item => item.id === 'CRPDilution').price, 300);
+    assert.deepEqual(policy.labs.filter(item => item.womenHealth).map(item => item.name), ['Beta - hCG', 'Estrogen', 'Progesterone', 'FSH', 'LH', 'Prolactin', 'AMH']);
+    assert.deepEqual(policy.imaging.map(item => [item.name, item.price]), [['CTG', 500], ['USG Abdomen', 500], ['Vaginal Scan', 550]]);
     assert.deepEqual(policy.departments, ['Obstetrics & Gynaecology', 'Family Medicine & Diabetology']);
 });
 test('new OP, day 7 and day 8 use confirmed fees; phone OP adds 100', () => {

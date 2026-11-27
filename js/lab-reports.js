@@ -329,26 +329,38 @@ function autoSelectTemplate(testName) {
     const select = document.getElementById('labTemplateSelect');
     if (!select) return;
     
-    if (name.includes('cbc') || name.includes('complete blood count')) {
+    if (name.includes('cbp') || name.includes('cbc') || name.includes('complete blood picture') || name.includes('complete blood count')) {
         select.value = 'cbc';
     } else if (name.includes('hba1c') || name.includes('glycated')) {
         select.value = 'hba1c';
+    } else if (name.includes('mp card') || name.includes('malaria')) {
+        select.value = 'malaria';
+    } else if (name.includes('dengue')) {
+        select.value = 'dengue';
+    } else if (name.includes('widal') || name.includes('typhoid')) {
+        select.value = 'widal';
     } else if (name.includes('fever')) {
         select.value = 'fever';
     } else if (name.includes('lipid')) {
         select.value = 'lipid';
-    } else if (name.includes('thyroid')) {
+    } else if (name.includes('thyroid') || name === 't3 & t4' || name === 't3 and t4' || name === 'tsh') {
         select.value = 'thyroid';
-    } else if (name.includes('sugar') || name.includes('glucose')) {
+    } else if (name.includes('fbs') || name.includes('ppbs') || name.includes('rbs') || name.includes('sugar') || name.includes('glucose')) {
         select.value = 'sugar';
-    } else if (name.includes('urine')) {
+    } else if (name.includes('cue') || name.includes('urine')) {
         select.value = 'urine';
     } else if (name.includes('lft') || name.includes('liver')) {
         select.value = 'lft';
-    } else if (name.includes('kft') || name.includes('kidney') || name.includes('renal')) {
+    } else if (name.includes('rft') || name.includes('kft') || name.includes('kidney') || name.includes('renal')) {
         select.value = 'kft';
     } else if (name.includes('electrolyte')) {
         select.value = 'electrolytes';
+    } else if (name.includes('blood grouping') || name.includes('blood group')) {
+        select.value = 'blood_group_rh';
+    } else if (name.includes('bt - ct') || name.includes('pt - inr') || name.includes('aptt')) {
+        select.value = 'coagulation';
+    } else if (name.includes('crp')) {
+        select.value = 'crp';
     } else {
         select.value = '';
     }
@@ -365,7 +377,10 @@ getCurrentUser((user) => {
     // Toggle Pending Requests sections based on role
     const pendingRequestsContainer = document.getElementById('pendingRequestsContainer');
     if (pendingRequestsContainer) {
-        if (['lab_technician', 'admin', 'owner', 'doctor'].includes(currentUserRole)) {
+        // Lab staff and administrators use the shared Lab Work Queue below.
+        // Keep the awaiting-billing panel for doctors as a compact view of
+        // their own orders without duplicating every queue row for lab staff.
+        if (['doctor'].includes(currentUserRole)) {
             pendingRequestsContainer.style.display = 'block';
             loadPendingRequests();
         } else {
@@ -594,7 +609,8 @@ function loadPendingLabWork() {
     if (!tbody) return;
 
     function renderQueue(snap) {
-        if (countEl) countEl.textContent = snap.size + ' pending';
+        var activeCount = 0;
+        if (countEl) countEl.textContent = '0 active';
         if (snap.empty) {
             setEmptyRow('pendingLabBody', 'No pending lab work from billed orders.', 8);
             return;
@@ -603,6 +619,9 @@ function loadPendingLabWork() {
         var idx = 1;
         snap.forEach(doc => {
             var q = doc.data();
+            var queueStatus = String(q.reportStatus || '').toLowerCase();
+            if (queueStatus !== 'pending' && queueStatus !== 'awaiting_payment') return;
+            activeCount++;
             var pos = getOrdinal(idx++);
             var dateVal = q.createdAt ? formatDate(q.createdAt) : '—';
             var queueJson = JSON.stringify({
@@ -610,11 +629,13 @@ function loadPendingLabWork() {
                 billDocId: q.billDocId,
                 billId: q.billId,
                 patientId: q.patientId,
+                patientDocId: q.patientDocId || '',
                 patientName: q.patientName,
                 doctor: q.visitDoctor || '',
                 testName: q.testName || '',
                 amount: q.amount || 0,
-                labNotes: q.labNotes || ''
+                labNotes: q.labNotes || '',
+                reportDocId: q.reportId || ''
             }).replace(/"/g, '&quot;');
             var isEmergency = q.isEmergency === true || q.isEmergency === 'true';
             var rowStyle = isEmergency ? 'background:#fafafa; border-bottom:1px solid #e2e8f0;' : 'border-bottom:1px solid #E2E8F0;';
@@ -627,31 +648,36 @@ function loadPendingLabWork() {
             html += '<td style="padding:10px 14px;font-weight:500;">' + escapeHtml(q.testName || '') + '</td>';
             html += '<td style="padding:10px 14px;font-size:12px;color:#666;">' + escapeHtml(q.labNotes || '—') + '</td>';
             html += '<td style="padding:10px 14px;">' + escapeHtml(dateVal) + '</td>';
-            html += '<td style="padding:10px 14px;"><button onclick="startLabUploadQueue(' + queueJson + ')" class="btn-primary" style="padding:7px 14px;font-size:12px;"><i class="fa-solid fa-upload"></i> Upload</button></td>';
+            var actionHtml = queueStatus === 'awaiting_payment'
+                ? '<span style="font-size:12px;color:#b45309;font-weight:600;">Awaiting reception payment</span>'
+                : '<button onclick="startLabUploadQueue(' + queueJson + ')" class="btn-primary" style="padding:7px 14px;font-size:12px;"><i class="fa-solid fa-upload"></i> Upload</button>';
+            html += '<td style="padding:10px 14px;">' + actionHtml + '</td>';
             html += '</tr>';
         });
+        if (!activeCount) {
+            setEmptyRow('pendingLabBody', 'No pending lab work from doctor orders.', 8);
+            if (countEl) countEl.textContent = '0 active';
+            return;
+        }
+        if (countEl) countEl.textContent = activeCount + ' active';
         tbody.innerHTML = html;
     }
 
-    db.collection('labQueue')
-    .where('reportStatus', '==', 'pending')
-    .orderBy('isEmergency', 'desc')
-    .orderBy('createdAt', 'asc')
-    .onSnapshot(renderQueue, function (err) {
-        console.warn('Pending lab queue composite query failed, falling back:', err.message);
-        db.collection('labQueue').where('reportStatus', '==', 'pending')
-            .onSnapshot(renderQueue, function (err2) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:red;">Error: ' + escapeHtml(err2.message) + '</td></tr>';
-            });
+    db.collection('labQueue').onSnapshot(renderQueue, function (err) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:red;">Error: ' + escapeHtml(err.message) + '</td></tr>';
     });
 }
 window.loadPendingLabWork = loadPendingLabWork;
 
 function startLabUploadQueue(data) {
     window.currentQueueData = data;
+    // Doctor-created orders already have a pending report document. Update
+    // that report instead of creating a duplicate when the lab uploads the
+    // result. Billing-created queue rows without a report keep the old flow.
+    activeReportDocId = data.reportDocId || '';
     // Pre-fill patient in upload modal
     document.getElementById('lab_patientSearchInput').value = data.patientName + ' — ' + data.patientId;
-    selectedPatient_lab = { patientId: data.patientId, name: data.patientName, doctor: data.doctor };
+    selectedPatient_lab = { patientId: data.patientId, docId: data.patientDocId || '', name: data.patientName, doctor: data.doctor };
     document.getElementById('lab_cardPatientName').textContent = data.patientName;
     document.getElementById('lab_cardPatientId').textContent = data.patientId;
     document.getElementById('lab_selectedPatientCard').style.display = 'block';

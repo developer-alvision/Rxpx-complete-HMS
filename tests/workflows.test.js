@@ -92,6 +92,10 @@ test('consultation completion commits clinical record, orders, bill and appointm
     assert.equal(h.records.get('bills/' + completed.billDocId).grandTotal, 250, 'zero fee is preserved');
     assert.equal(h.records.get('appointments/a1').status, 'completed');
     assert.equal(h.records.get('billCounters/opd').count, 1);
+    const labQueueEntries = [...h.records.entries()].filter(([key]) => key.startsWith('labQueue/'));
+    assert.equal(labQueueEntries.length, 1);
+    assert.equal(labQueueEntries[0][1].reportStatus, 'awaiting_payment');
+    assert.equal(labQueueEntries[0][1].authorizationStatus, 'awaiting_payment');
     const count = h.records.size;
     await h.context.triggerDownstreamActions(clinicalRecord());
     assert.equal(h.records.size, count, 'retry must not create duplicate orders or bills');
